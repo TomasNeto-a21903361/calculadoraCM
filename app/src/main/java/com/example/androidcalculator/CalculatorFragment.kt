@@ -1,59 +1,111 @@
 package com.example.androidcalculator
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.androidcalculator.databinding.ActivityMainBinding
+import com.example.androidcalculator.databinding.FragmentCalculatorBinding
+import net.objecthunter.exp4j.ExpressionBuilder
+import java.sql.Date
+import java.text.SimpleDateFormat
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [CalculatorFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class CalculatorFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+    private val TAG = MainActivity::class.java.simpleName
+    //private lateinit var binding: ActivityMainBinding
+    private val operations = mutableListOf<OperationUi>()
+    private val adapter = HistoryAdapter(::onOperationClick)
+
+    private lateinit var binding: FragmentCalculatorBinding
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(
+            R.layout.fragment_calculator,container,false
+        )
+        binding = FragmentCalculatorBinding.bind(view)
+        return binding.root
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        binding.button0.setOnClickListener{onClickSymbol("0")}
+        binding.button1.setOnClickListener{onClickSymbol("1")}
+        binding.button2.setOnClickListener{onClickSymbol("2")}
+        binding.button3.setOnClickListener{onClickSymbol("3")}
+        binding.button4.setOnClickListener{onClickSymbol("4")}
+        binding.button5.setOnClickListener{onClickSymbol("5")}
+        binding.button6.setOnClickListener{onClickSymbol("6")}
+        binding.button7.setOnClickListener{onClickSymbol("7")}
+        binding.button8.setOnClickListener{onClickSymbol("8")}
+        binding.button9.setOnClickListener{onClickSymbol("9")}
+        binding.buttonAddition.setOnClickListener{onClickSymbol("+")}
+        binding.buttonSubtraction.setOnClickListener{onClickSymbol("-")}
+        binding.buttonMultiplication.setOnClickListener{onClickSymbol("*")}
+        binding.buttonDivision.setOnClickListener{onClickSymbol("/")}
+        binding.buttonExponent.setOnClickListener{onClickSymbol("^")}
+        binding.buttonRest.setOnClickListener{onClickSymbol("%")}
+        binding.buttonDot.setOnClickListener{onClickSymbol(".")}
+        binding.buttonClear.setOnClickListener{onClickClear()}
+        binding.buttonEquals.setOnClickListener{onClickEquals()}
+
+        binding.rvHistoric?.layoutManager = LinearLayoutManager(activity as Context)
+        binding.rvHistoric?.adapter = adapter
+
+
+    }
+
+    private fun onClickSymbol(symbol: String) {
+        Log.i(TAG,"click no botão $symbol")
+        if (binding.textVisor.text.toString() == "0") {
+            binding.textVisor.text = symbol
+        }
+        else {
+            binding.textVisor.append(symbol)
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_calculator, container, false)
+    private fun onClickEquals() {
+        Log.i(TAG,"click no botao =")
+
+        val expression = ExpressionBuilder(
+            binding.textVisor.text.toString()
+        ).build()
+
+        val expressao = binding.textVisor.text.toString()
+
+        binding.textVisor.text = expression.evaluate().toString()
+
+        val resultado = "=" + binding.textVisor.text.toString()
+
+        val card = OperationUi(expressao,resultado,System.currentTimeMillis())
+
+        operations.add(card)
+
+        Log.i(TAG,operations.toString())
+
+        adapter.updateItems(operations)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment CalculatorFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            CalculatorFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    private fun onClickClear() {
+        Log.i(TAG,"click no botao clear")
+        binding.textVisor.text = "0"
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private fun onOperationClick (operation: String) {
+        val content = operation.split(" ")
+        val formatter = SimpleDateFormat("dd/MM/yyyy - hh:mm:ss")
+        val date = Date(content[1].toLong())
+
+
+        Toast.makeText(activity as Context, formatter.format(date) , Toast.LENGTH_LONG).show()
     }
 }
