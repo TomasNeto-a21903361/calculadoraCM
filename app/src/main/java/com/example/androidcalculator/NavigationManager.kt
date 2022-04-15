@@ -14,4 +14,8 @@ object NavigationManager {
     fun goToCalculatorFragment (fm: FragmentManager) {
         placeFragement(fm,CalculatorFragment())
     }
+
+    fun goToHistoryFragment (fm: FragmentManager) {
+        placeFragement(fm, HistoryFragment())
+    }
 }
