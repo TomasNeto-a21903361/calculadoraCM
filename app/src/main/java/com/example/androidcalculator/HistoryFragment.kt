@@ -1,6 +1,7 @@
 package com.example.androidcalculator
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -8,6 +9,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.androidcalculator.databinding.FragmentHistoryBinding
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -21,6 +24,7 @@ private const val ARG_OPERATIONS = "param1"
  */
 class HistoryFragment : Fragment() {
     // TODO: Rename and change types of parameters
+    private lateinit var binding: FragmentHistoryBinding
     private var operations: ArrayList<OperationUi>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,10 +37,18 @@ class HistoryFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        (requireActivity() as AppCompatActivity).supportActionBar?.title = "Histórico"
+    ): View {
+        (requireActivity() as AppCompatActivity).supportActionBar?.title = getString(R.string.history)
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_history, container, false)
+        val view = inflater.inflate(R.layout.fragment_history, container, false)
+        binding = FragmentHistoryBinding.bind(view)
+        return binding.root
+    }
+
+    override fun onStart() {
+        super.onStart()
+        binding.rvHistoric.layoutManager = LinearLayoutManager(activity as Context)
+        binding.rvHistoric.adapter = HistoryAdapter({},(activity as MainActivity).getOperations())
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
