@@ -1,10 +1,14 @@
 package com.example.androidcalculator
 
+import android.annotation.SuppressLint
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
+import com.example.androidcalculator.databinding.FragmentOperationDetailBinding
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -19,6 +23,7 @@ private const val ARG_OPERATION = "param1"
 class OperationDetailFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var operationUi: OperationUi? = null
+    private lateinit var binding: FragmentOperationDetailBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,9 +35,31 @@ class OperationDetailFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
+        (requireActivity() as AppCompatActivity).supportActionBar?.title = getString(R.string.details)
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_operation_detail, container, false)
+        val view = inflater.inflate(R.layout.fragment_operation_detail, container, false)
+        binding = FragmentOperationDetailBinding.bind(view)
+        return binding.root
+    }
+
+    @SuppressLint("SetTextI18n")
+    override fun onStart() {
+        super.onStart()
+        binding.textExpression.text = operationUi?.expression
+        binding.textResult.text = "=${operationUi?.result}"
+        binding.textDatetime.text = operationUi?.getOperationDate()
+    }
+
+    @SuppressLint("SourceLockedOrientationActivity")
+    override fun onResume() {
+        super.onResume()
+        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    }
+
+    override fun onPause() {
+        super.onPause()
+        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
     }
 
     companion object {

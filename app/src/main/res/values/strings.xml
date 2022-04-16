@@ -6,6 +6,7 @@
     <!-- Drawer -->
     <string name="calculator">Calculadora</string>
     <string name="history">Histórico</string>
+    <string name="details">Detalhes</string>
     <string name="drawer_open">Aberto</string>
     <string name="drawer_close">Fechado</string>
     <!-- TODO: Remove or change this placeholder text -->

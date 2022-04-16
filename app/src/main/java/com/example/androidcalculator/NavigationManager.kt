@@ -18,4 +18,11 @@ object NavigationManager {
     fun goToHistoryFragment (fm: FragmentManager) {
         placeFragement(fm, HistoryFragment())
     }
+
+    fun goToOperationDetail(fm: FragmentManager, operationUi: OperationUi){
+        val transition = fm.beginTransaction()
+        transition.replace(R.id.frame, OperationDetailFragment.newInstance(operationUi))
+        transition.addToBackStack(null)
+        transition.commit()
+    }
 }

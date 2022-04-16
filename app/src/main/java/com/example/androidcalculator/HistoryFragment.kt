@@ -48,7 +48,7 @@ class HistoryFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         binding.rvHistoric.layoutManager = LinearLayoutManager(activity as Context)
-        binding.rvHistoric.adapter = HistoryAdapter({},(activity as MainActivity).getOperations())
+        binding.rvHistoric.adapter = HistoryAdapter(parentFragmentManager,(activity as MainActivity).getOperations())
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
@@ -80,4 +80,6 @@ class HistoryFragment : Fragment() {
                 }
         }
     }
+
+
 }
