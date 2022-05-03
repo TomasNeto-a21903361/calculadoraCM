@@ -28,7 +28,7 @@ class HistoryFragment : Fragment() {
     private lateinit var binding: FragmentHistoryBinding
     private lateinit var viewModel: CalculatorViewModel
     private var history: ArrayList<OperationUi>? = null
-    private val adapter = HistoryAdapter(parentFragmentManager,history)
+    private val adapter = history?.let { HistoryAdapter(parentFragmentManager, it) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
