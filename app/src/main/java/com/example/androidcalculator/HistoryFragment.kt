@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.androidcalculator.databinding.FragmentHistoryBinding
 
@@ -25,12 +26,14 @@ private const val ARG_OPERATIONS = "param1"
 class HistoryFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private lateinit var binding: FragmentHistoryBinding
-    private var operations: ArrayList<OperationUi>? = null
+    private lateinit var viewModel: CalculatorViewModel
+    private var history: ArrayList<OperationUi>? = null
+    private val adapter = HistoryAdapter(parentFragmentManager,history)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            operations = it.getParcelableArrayList(ARG_OPERATIONS)
+            history = it.getParcelableArrayList(ARG_OPERATIONS)
         }
     }
 
@@ -40,6 +43,9 @@ class HistoryFragment : Fragment() {
     ): View {
         (requireActivity() as AppCompatActivity).supportActionBar?.title = getString(R.string.history)
         // Inflate the layout for this fragment
+        viewModel = ViewModelProvider(this).get(
+            CalculatorViewModel::class.java
+        )
         val view = inflater.inflate(R.layout.fragment_history, container, false)
         binding = FragmentHistoryBinding.bind(view)
         return binding.root
@@ -48,7 +54,11 @@ class HistoryFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         binding.rvHistoric.layoutManager = LinearLayoutManager(activity as Context)
-        binding.rvHistoric.adapter = HistoryAdapter(parentFragmentManager,(activity as MainActivity).getOperations())
+        binding.rvHistoric.adapter = adapter
+
+        viewModel.getHistory {
+            history
+        }
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
@@ -73,10 +83,10 @@ class HistoryFragment : Fragment() {
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(operations: ArrayList<OperationUi>) =
+        fun newInstance(history: ArrayList<OperationUi>) =
              HistoryFragment().apply {
                 arguments = Bundle().apply {
-                    putParcelableArrayList(ARG_OPERATIONS, operations)
+                    putParcelableArrayList(ARG_OPERATIONS, history)
                 }
         }
     }
