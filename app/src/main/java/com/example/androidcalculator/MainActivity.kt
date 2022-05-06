@@ -19,7 +19,7 @@ import java.text.SimpleDateFormat
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val operations = mutableListOf<OperationUi>()
+    //private val operations = mutableListOf<OperationUi>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,6 +79,8 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    /*
+
     fun getOperations(): MutableList<OperationUi> {
         return operations
     }
@@ -86,7 +88,7 @@ class MainActivity : AppCompatActivity() {
     fun addOperation(operation: OperationUi){
         operations.add(operation)
     }
-
+*/
 
 
 }

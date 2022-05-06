@@ -7,8 +7,9 @@ import java.sql.Date
 import java.text.SimpleDateFormat
 
 @Parcelize
-class OperationUi(val expression: String, val result: String,
-                  private val timestamp: Long = System.currentTimeMillis()) : Parcelable {
+data class OperationUi(
+    val uuid: String, val expression: String, val result: Double, val timestamp: Long
+) : Parcelable {
 
 
     override fun toString(): String {

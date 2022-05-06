@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 
 class CalculatorViewModel : ViewModel() {
 
-    private val model = CalculatorModel()
+    private val model = CalculatorModel
 
     fun getDisplayValue() = model.display
 
@@ -16,23 +16,23 @@ class CalculatorViewModel : ViewModel() {
         return model.insertSymbol(symbol)
     }
 
-    fun onClickEquals(): String {
-        val result = model.performOperation()
-        return result.toString()
+    fun onClickEquals(onSaved: () -> Unit): String {
+        model.performOperation(onSaved)
+        val result = getDisplayValue().toDouble()
+        return if(result % 1 == 0.0) result.toLong().toString() else result.toString()
     }
 
     fun onClickClear() : String {
-        model.display = "0"
-        return model.display
+       return model.clear()
     }
 
-    fun getHistory(callback: (List<OperationUi>) -> Unit) {
-        model.getAllOperations{
-            operations ->
-            val history = operations.map {
-                OperationUi(it.expression, it.result.toString(), it.timestamp)
-            }
-            CoroutineScope(Dispatchers.Main).launch { callback(history) }
-        }
+    fun onGetHistory(onFinished: (List<Operation>) -> Unit) {
+        model.getAllOperations(onFinished)
     }
+
+    fun onDeleteOperation(uuid: String, onSuccess: () -> Unit) {
+        model.deleteOperation(uuid, onSuccess)
+    }
+
+    
 }

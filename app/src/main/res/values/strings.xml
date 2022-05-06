@@ -11,4 +11,6 @@
     <string name="drawer_close">Fechado</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="delete">Apagar</string>
+    <string name="registry_saved">Registo Salvo</string>
 </resources>

@@ -14,6 +14,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.androidcalculator.databinding.ActivityMainBinding
 import com.example.androidcalculator.databinding.FragmentCalculatorBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.objecthunter.exp4j.ExpressionBuilder
 import java.sql.Date
 import java.text.SimpleDateFormat
@@ -26,6 +29,7 @@ class CalculatorFragment : Fragment() {
 
     private lateinit var binding: FragmentCalculatorBinding
     private lateinit var viewModel: CalculatorViewModel
+    private var adapter = HistoryAdapter(onClick = ::onOperationClick, onLongClick = ::onOperationLongClick)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,6 +51,10 @@ class CalculatorFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+        binding.rvHistoric?.layoutManager = LinearLayoutManager(context)
+        binding.rvHistoric?.adapter = adapter
+        viewModel.onGetHistory { updateHistory(it) }
+        binding.textVisor.text = viewModel.getDisplayValue()
 
         binding.button0.setOnClickListener {
             binding.textVisor.text = viewModel.onClickSymbol("0")
@@ -100,50 +108,46 @@ class CalculatorFragment : Fragment() {
             binding.textVisor.text = viewModel.onClickSymbol(".")
         }
         binding.buttonClear.setOnClickListener {
-            binding.textVisor.text = viewModel.onClickClear()
+            onClickClear()
         }
         binding.buttonEquals.setOnClickListener {
-            binding.textVisor.text = viewModel.onClickEquals()
+            onClickEquals()
         }
 
 
+    }
+
+    private fun updateHistory(operations: List<Operation>) {
+        val history = operations.map { OperationUi(it.uuid, it.expression, it.result, it.timestamp) }
+        CoroutineScope(Dispatchers.Main).launch {
+            adapter.updateItems(history)
+        }
     }
 
 
     private fun onClickEquals() {
-        Log.i(TAG, "click no botao =")
-
-        val expression = binding.textVisor.text.toString()
-
-        val expressionBuilder = ExpressionBuilder(
-            expression
-        ).build()
-
-        val result = expressionBuilder.evaluate().toString()
-
-        binding.textVisor.text = result
-
-
-        (activity as MainActivity).addOperation(
-            OperationUi(
-                expression = expression,
-                result = result
-            )
-        )
-
-
-        Log.i(TAG, (activity as MainActivity).getOperations().toString())
-
-
+        val displayUpdated = viewModel.onClickEquals {
+            CoroutineScope(Dispatchers.Main).launch {
+                Toast.makeText(context, getString(R.string.registry_saved), Toast.LENGTH_LONG).show()
+                viewModel.onGetHistory { updateHistory(it) }
+            }
+        }
+        binding.textVisor.text = displayUpdated
     }
 
     private fun onClickClear() {
-        Log.i(TAG, "click no botao clear")
-        binding.textVisor.text = "0"
+        val displayUpdated = viewModel.onClickClear()
+        binding.textVisor.text = displayUpdated
     }
 
 
-    private fun onOperationClick(operation: String) {
-        Toast.makeText(activity as Context, operation, Toast.LENGTH_LONG).show()
+    private fun onOperationClick(operation: OperationUi) {
+        NavigationManager.goToOperationDetail(parentFragmentManager, operation)
+    }
+
+    private fun onOperationLongClick(operation: OperationUi): Boolean {
+        Toast.makeText(context, getString(R.string.delete), Toast.LENGTH_SHORT).show()
+        viewModel.onDeleteOperation(operation.uuid) { viewModel.onGetHistory { updateHistory(it) } }
+        return false
     }
 }

@@ -8,10 +8,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.androidcalculator.databinding.ItemExpressionBinding
 
 
-class HistoryAdapter(private val supportFragmentManager: FragmentManager,
+class HistoryAdapter(//private val supportFragmentManager: FragmentManager,
                     //private val onOperationClick: (String) -> Unit,
+                     private val onClick: (OperationUi) -> Unit,
+                     private val onLongClick: (OperationUi) -> Boolean,
                      private var items: List<OperationUi> = listOf()) :
     RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
+
     class HistoryViewHolder(val binding: ItemExpressionBinding) :
         RecyclerView.ViewHolder(binding.root)
 
@@ -25,16 +28,10 @@ class HistoryAdapter(private val supportFragmentManager: FragmentManager,
     }
 
     override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
-        holder.itemView.setOnClickListener{
-            //onOperationClick(items[position].toString())
-            NavigationManager.goToOperationDetail(supportFragmentManager,items[position])
-        }
-        //val parts = items[position]?.split("=")
-        //holder.binding.textExpression.text = parts?.get(0)
-        //holder.binding.textResult.text = parts?.get(1)
-
         holder.binding.textExpression.text = items[position].expression
-        holder.binding.textResult.text = items[position].result
+        holder.binding.textResult.text = items[position].result.toString()
+        holder.itemView.setOnClickListener { onClick(items[position]) }
+        holder.itemView.setOnLongClickListener { onLongClick(items[position]) }
     }
 
     override fun getItemCount() = items.size
