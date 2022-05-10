@@ -1,14 +1,19 @@
 package com.example.androidcalculator
 
+import android.app.Application
+import android.app.SharedElementCallback
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class CalculatorViewModel : ViewModel() {
+class CalculatorViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val model = CalculatorModel
+    private val model = CalculatorModel(
+        CalculatorDatabase.getInstance(application).operationDao()
+    )
 
     fun getDisplayValue() = model.display
 
@@ -26,8 +31,10 @@ class CalculatorViewModel : ViewModel() {
        return model.clear()
     }
 
-    fun onGetHistory(onFinished: (List<Operation>) -> Unit) {
-        model.getAllOperations(onFinished)
+    fun onGetHistory(callback: (List<OperationUi>) -> Unit) {
+        CoroutineScope(Dispatchers.Main).launch {
+            model.getAllOperations(callback)
+        }
     }
 
     fun onDeleteOperation(uuid: String, onSuccess: () -> Unit) {

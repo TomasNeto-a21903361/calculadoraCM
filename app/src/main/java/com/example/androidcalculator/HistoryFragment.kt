@@ -29,12 +29,13 @@ private const val ARG_OPERATIONS = "param1"
  */
 class HistoryFragment : Fragment() {
     // TODO: Rename and change types of parameters
-    private val model = CalculatorModel
+    private lateinit var model: CalculatorModel
     private lateinit var binding: FragmentHistoryBinding
     //private val adapter = history?.let { HistoryAdapter(parentFragmentManager, it) }
     private var adapter = HistoryAdapter(onClick = ::onOperationClick, onLongClick = ::onOperationLongClick)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        model = CalculatorModel(CalculatorDatabase.getInstance(requireContext()).operationDao())
         (requireActivity() as AppCompatActivity).supportActionBar?.title = getString(R.string.history)
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_history, container, false)
@@ -72,7 +73,7 @@ class HistoryFragment : Fragment() {
         return false
     }
 
-    private fun updateHistory(operations: List<Operation>) {
+    private fun updateHistory(operations: List<OperationUi>) {
         val history = operations.map { OperationUi(it.uuid, it.expression, it.result, it.timestamp) }
         CoroutineScope(Dispatchers.Main).launch {
             showHistory(history.isNotEmpty())

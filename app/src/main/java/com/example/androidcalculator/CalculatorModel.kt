@@ -8,11 +8,12 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import net.objecthunter.exp4j.Expression
 import net.objecthunter.exp4j.ExpressionBuilder
+import java.util.*
 
-object CalculatorModel {
+class CalculatorModel(private val dao: OperationDao) {
     var display: String = "0"
     private set
-    private val history = mutableListOf<Operation>()
+    //private val history = mutableListOf<Operation>()
 
     fun insertSymbol(symbol: String): String {
         display = if(display == "0") symbol else "$display$symbol"
@@ -24,35 +25,29 @@ object CalculatorModel {
         return display
     }
 
-    fun performOperation(onSaved: () -> Unit) {
+    fun performOperation(onFinished: () -> Unit) {
         val expressionBuilder = ExpressionBuilder(display).build()
         val result = expressionBuilder.evaluate()
-        val operation = Operation(expression = display, result = result)
+        val operation = OperationRoom(expression = display, result = result, timestamp = Date().time)
         display = result.toString()
         CoroutineScope(Dispatchers.IO).launch {
-            addHistory(operation)
-            onSaved()
+            dao.insert(operation)
+            onFinished()
         }
     }
 
-    private fun addHistory(operation: Operation) {
-        Thread.sleep(1 * 1000)
-        //Log.wtf(TAG,expression + " " + result)
-        history.add(operation)
-    }
-
-    fun getAllOperations(callback: (List<Operation>) -> Unit) {
+    fun getAllOperations(onFinished: (List<OperationUi>) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
-            Thread.sleep(1 * 1000)
-            callback(history.toList())
+            val operations = dao.getAll()
+            onFinished(operations.map {
+                OperationUi(it.uuid,it.expression,it.result,it.timestamp)
+            })
         }
     }
 
     fun deleteOperation(uuid: String, onSuccess: () -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
-            Thread.sleep(1 * 1000)
-            val operation = history.find { it.uuid == uuid }
-            history.remove(operation)
+            dao.deleteByUuid(uuid)
             onSuccess()
         }
     }
