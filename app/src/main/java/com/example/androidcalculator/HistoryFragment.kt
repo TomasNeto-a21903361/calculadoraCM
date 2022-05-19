@@ -31,15 +31,17 @@ private const val ARG_OPERATIONS = "param1"
  * create an instance of this fragment.
  */
 class HistoryFragment : Fragment() {
-    private lateinit var model: CalculatorModel
+    //private lateinit var model: CalculatorModel
+    private lateinit var viewModel: CalculatorViewModel
     private lateinit var binding: FragmentHistoryBinding
     //private val adapter = history?.let { HistoryAdapter(parentFragmentManager, it) }
     private var adapter = HistoryAdapter(onClick = ::onOperationClick, onLongClick = ::onOperationLongClick)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        model = CalculatorRoom(CalculatorDatabase.getInstance(requireContext()).operationDao())
+        //model = CalculatorRoom(CalculatorDatabase.getInstance(requireContext()).operationDao())
         (requireActivity() as AppCompatActivity).supportActionBar?.title = getString(R.string.history)
         val view = inflater.inflate(R.layout.fragment_history, container, false)
+        viewModel = ViewModelProvider(this).get(CalculatorViewModel::class.java)
         binding = FragmentHistoryBinding.bind(view)
         return binding.root
     }
@@ -48,7 +50,7 @@ class HistoryFragment : Fragment() {
         super.onStart()
         binding.rvHistoric.layoutManager = LinearLayoutManager(context)
         binding.rvHistoric.adapter = adapter
-        model.getHistory { updateHistory(it) }
+        viewModel.onGetHistory { updateHistory(it) }
     }
 
     /*
@@ -70,7 +72,7 @@ class HistoryFragment : Fragment() {
 
     private fun onOperationLongClick(operation: OperationUi): Boolean {
         Toast.makeText(requireContext(), getString(R.string.delete), Toast.LENGTH_SHORT).show()
-        model.deleteOperation(operation.uuid) { model.getHistory { updateHistory(it) } }
+        viewModel.onDeleteOperation(operation.uuid) { viewModel.onGetHistory { updateHistory(it) } }
         return false
     }
 
