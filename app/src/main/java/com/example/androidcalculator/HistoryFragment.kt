@@ -13,9 +13,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.androidcalculator.databinding.FragmentHistoryBinding
+import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -28,16 +31,14 @@ private const val ARG_OPERATIONS = "param1"
  * create an instance of this fragment.
  */
 class HistoryFragment : Fragment() {
-    // TODO: Rename and change types of parameters
     private lateinit var model: CalculatorModel
     private lateinit var binding: FragmentHistoryBinding
     //private val adapter = history?.let { HistoryAdapter(parentFragmentManager, it) }
     private var adapter = HistoryAdapter(onClick = ::onOperationClick, onLongClick = ::onOperationLongClick)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        model = CalculatorModel(CalculatorDatabase.getInstance(requireContext()).operationDao())
+        model = CalculatorRoom(CalculatorDatabase.getInstance(requireContext()).operationDao())
         (requireActivity() as AppCompatActivity).supportActionBar?.title = getString(R.string.history)
-        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_history, container, false)
         binding = FragmentHistoryBinding.bind(view)
         return binding.root
@@ -47,7 +48,7 @@ class HistoryFragment : Fragment() {
         super.onStart()
         binding.rvHistoric.layoutManager = LinearLayoutManager(context)
         binding.rvHistoric.adapter = adapter
-        model.getAllOperations { updateHistory(it) }
+        model.getHistory { updateHistory(it) }
     }
 
     /*
@@ -68,8 +69,8 @@ class HistoryFragment : Fragment() {
     }
 
     private fun onOperationLongClick(operation: OperationUi): Boolean {
-        Toast.makeText(context, getString(R.string.delete), Toast.LENGTH_SHORT).show()
-        model.deleteOperation(operation.uuid) { model.getAllOperations { updateHistory(it) } }
+        Toast.makeText(requireContext(), getString(R.string.delete), Toast.LENGTH_SHORT).show()
+        model.deleteOperation(operation.uuid) { model.getHistory { updateHistory(it) } }
         return false
     }
 
@@ -108,5 +109,26 @@ class HistoryFragment : Fragment() {
         }
     }
 */
+
+    private fun getAllOperationsWs(callback: (List<OperationUi>) -> Unit) {
+        data class GetAllOperationsResponse(val uuid: String, val expression:
+        String, val result: Double, val timestamp: Long)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val request: Request = Request.Builder()
+                .url("https://cm-calculadora.herokuapp.com/api/operations")
+                .addHeader("apikey","8270435acfead39ccb03e8aafbf37c49359dfbbcac4ef4769ae82c9531da0e17")
+                .build()
+
+            val response = OkHttpClient().newCall(request).execute().body
+            if (response!=null) {
+                val responseObj = Gson().fromJson(response.toString(),
+                Array<GetAllOperationsResponse>::class.java).toList()
+                callback(responseObj.map {
+                    OperationUi(uuid = it.uuid, expression = it.expression, result = it.result, timestamp = it.timestamp)
+                })
+            }
+        }
+    }
 
 }

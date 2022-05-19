@@ -9,32 +9,26 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class CalculatorViewModel(application: Application) : AndroidViewModel(application) {
+class CalculatorViewModel : ViewModel() {
 
-    private val model = CalculatorModel(
-        CalculatorDatabase.getInstance(application).operationDao()
-    )
+    private val model = CalculatorRepository.getInstance()
 
-    fun getDisplayValue() = model.display
+    fun getDisplayValue() = model.getExpression()
 
     fun onClickSymbol(symbol: String): String {
         return model.insertSymbol(symbol)
     }
 
-    fun onClickEquals(onSaved: () -> Unit): String {
-        model.performOperation(onSaved)
-        val result = getDisplayValue().toDouble()
-        return if(result % 1 == 0.0) result.toLong().toString() else result.toString()
+    fun onClickEquals(onFinished: () -> Unit) {
+        model.performOperation(onFinished)
     }
 
     fun onClickClear() : String {
        return model.clear()
     }
 
-    fun onGetHistory(callback: (List<OperationUi>) -> Unit) {
-        CoroutineScope(Dispatchers.Main).launch {
-            model.getAllOperations(callback)
-        }
+    fun onGetHistory(onFinished: (List<OperationUi>) -> Unit) {
+        model.getHistory(onFinished)
     }
 
     fun onDeleteOperation(uuid: String, onSuccess: () -> Unit) {

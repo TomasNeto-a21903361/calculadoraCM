@@ -31,21 +31,13 @@ class CalculatorFragment : Fragment() {
     private lateinit var viewModel: CalculatorViewModel
     private var adapter = HistoryAdapter(onClick = ::onOperationClick, onLongClick = ::onOperationLongClick)
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         (requireActivity() as AppCompatActivity).supportActionBar?.title = getString(R.string.calculator)
         val view = inflater.inflate(
             R.layout.fragment_calculator, container, false
         )
+        viewModel = ViewModelProvider(this).get(CalculatorViewModel::class.java)
         binding = FragmentCalculatorBinding.bind(view)
-
-        viewModel = ViewModelProvider(this).get(
-            CalculatorViewModel::class.java
-        )
-        binding.textVisor.text = viewModel.getDisplayValue()
         return binding.root
     }
 
@@ -126,13 +118,13 @@ class CalculatorFragment : Fragment() {
 
 
     private fun onClickEquals() {
-        val displayUpdated = viewModel.onClickEquals {
+        viewModel.onClickEquals {
             CoroutineScope(Dispatchers.Main).launch {
                 Toast.makeText(context, getString(R.string.registry_saved), Toast.LENGTH_LONG).show()
+                binding.textVisor.text = viewModel.getDisplayValue()
                 viewModel.onGetHistory { updateHistory(it) }
             }
         }
-        binding.textVisor.text = displayUpdated
     }
 
     private fun onClickClear() {

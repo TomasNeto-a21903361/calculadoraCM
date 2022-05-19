@@ -15,8 +15,7 @@ class HistoryAdapter(//private val supportFragmentManager: FragmentManager,
                      private var items: List<OperationUi> = listOf()) :
     RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
 
-    class HistoryViewHolder(val binding: ItemExpressionBinding) :
-        RecyclerView.ViewHolder(binding.root)
+    class HistoryViewHolder(val binding: ItemExpressionBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
         return HistoryViewHolder(
